@@ -86,14 +86,16 @@ class StoredFilesController < ApplicationController
   def freq_words
     limit = params[:limit]&.to_i || 10
     order = params[:order] == 'asc' ? :asc : :desc
-
+  
     word_counts = Hash.new(0)
-
+  
     StoredFile.all.each do |stored_file|
-      words = stored_file.file.download.split
-      words.each { |word| word_counts[word] += 1 }
+      words = stored_file.file.download.split.map do |word|
+        word.gsub(/[^a-zA-Z0-9']/, '') # Remove special characters except for alphanumeric and contractions
+      end
+      words.each { |word| word_counts[word.downcase] += 1 unless word.strip.empty? }
     end
-
+  
     sorted_words = word_counts.sort_by { |_, count| count }
     sorted_words.reverse! if order == :desc
     render json: sorted_words.first(limit).to_h

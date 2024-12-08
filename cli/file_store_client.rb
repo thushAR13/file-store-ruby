@@ -145,10 +145,10 @@ if __FILE__ == $PROGRAM_NAME
   else
     puts 'Usage: ruby file_store_client.rb [command] [arguments]'
     puts 'Commands:'
-    puts '  add <file_path>'
+    puts '  add <file_name>'
     puts '  list'
-    puts '  delete <file_id>'
-    puts '  update <file_path> <file_name>'
+    puts '  delete <file_name>'
+    puts '  update <file_name>'
     puts '  word_count'
     puts '  freq_words [limit] [order]'
   end
