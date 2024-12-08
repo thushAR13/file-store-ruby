@@ -30,6 +30,17 @@ spec:
             secretKeyRef:
               name: stored-files-secret
               key: SECRET_KEY_BASE
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_HOST
+          value: postgres
+        - name: POSTGRES_PORT
+          value: "5432"
         resources:
           requests:
             memory: "64Mi"
@@ -44,7 +55,6 @@ spec:
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 10
-
         readinessProbe:
           httpGet:
             scheme: HTTP
