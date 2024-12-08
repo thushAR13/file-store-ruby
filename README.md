@@ -1,138 +1,152 @@
-File Store Service
+# File Store Service
 
-Overview
+## Overview
 
 This is a file store service built with Ruby on Rails that provides an HTTP server and a command-line client (CLI) for managing plain-text files. The service allows you to:
 
-Add files to the server.
+- **Add files** to the server.
+- **List stored files.**
+- **Delete files** by name.
+- **Update file contents.**
+- Perform operations like **word count** and **finding the most frequent words**.
 
-List stored files.
+The service is optimized to avoid uploading duplicate file contents by using **SHA256 hashing** to detect existing files on the server.
 
-Delete files by name.
+---
 
-Update file contents.
+## Installation and Setup
 
-Perform operations like word count and finding the most frequent words.
+### Prerequisites
 
-The service is optimized to avoid uploading duplicate file contents by using SHA256 hashing to detect existing files on the server.
+- **Ruby** (>= 3.1)
+- **Rails** (>= 7.0)
+- **PostgreSQL**
+- **Docker** (optional)
 
-Installation and Setup
+### Clone the Repository
 
-Prerequisites
-
-Ruby (>= 3.1)
-
-Rails (>= 7.0)
-
-PostgreSQL
-
-Docker (optional)
-
-Clone the Repository
-
+```bash
 git clone <repository_url>
 cd file_store
+```
 
-Install Dependencies
+### Install Dependencies
 
+```bash
 bundle install
+```
 
-Configure the Database
+### Configure the Database
 
-Edit the config/database.yml file to set up your PostgreSQL credentials.
+1. Edit the `config/database.yml` file to set up your PostgreSQL credentials.
+2. Create the database:
 
-Create the database:
+   ```bash
+   rails db:create
+   rails db:migrate
+   ```
 
-rails db:create
-rails db:migrate
+### Start the Server
 
-Start the Server
-
+```bash
 rails server
+```
 
-The server will start at http://localhost:3000.
+The server will start at [http://localhost:3000](http://localhost:3000).
 
-CLI Usage
+---
 
-The CLI client is located in cli/file_store_client.rb. Below are the available commands:
+## CLI Usage
 
-Add Files
+The CLI client is located in `cli/file_store_client.rb`. Below are the available commands:
 
+### Add Files
+
+```bash
 ruby cli/file_store_client.rb add <file_path1> <file_path2> ...
+```
 
-Uploads one or more files to the server.
+- Uploads one or more files to the server.
+- Optimized to reuse existing content if a file with the same content exists on the server.
 
-Optimized to reuse existing content if a file with the same content exists on the server.
+### List Files
 
-List Files
-
+```bash
 ruby cli/file_store_client.rb list
+```
 
-Retrieves a list of all stored files.
+- Retrieves a list of all stored files.
 
-Delete a File
+### Delete a File
 
+```bash
 ruby cli/file_store_client.rb delete <file_name>
+```
 
-Deletes a file by name.
+- Deletes a file by name.
 
-Update a File
+### Update a File
 
+```bash
 ruby cli/file_store_client.rb update <file_path>
+```
 
-Updates the contents of a file on the server.
+- Updates the contents of a file on the server.
 
-Word Count
+### Word Count
 
+```bash
 ruby cli/file_store_client.rb word_count
+```
 
-Returns the total number of words across all files.
+- Returns the total number of words across all files.
 
-Frequent Words
+### Frequent Words
 
-For kubernetes
-
-Prerequisites
-
-Kubernetes cluster (e.g., Minikube, Kind, or a cloud provider)
-
-PostgreSQL database
-
-Docker for building and pushing application images
-
+```bash
 ruby cli/file_store_client.rb freq_words [limit] [order]
+```
 
-limit: Number of words to retrieve (default: 10).
+- **limit**: Number of words to retrieve (default: 10).
+- **order**: `asc` for least frequent, `desc` for most frequent (default: `desc`).
 
-order: asc for least frequent, desc for most frequent (default: desc).
+---
 
-Environment Variables
+## For Kubernetes
+
+### Prerequisites
+
+- Kubernetes cluster (e.g., Minikube, Kind, or a cloud provider)
+- PostgreSQL database
+- Docker for building and pushing application images
+
+### Environment Variables
 
 The following environment variables must be set via Kubernetes ConfigMaps and Secrets:
 
-BASE_URL: From ConfigMap (stored-files-config).
+- **BASE_URL**: From ConfigMap (`stored-files-config`).
+- **SECRET_KEY_BASE**: From Secret (`stored-files-secret`).
+- **POSTGRES_PASSWORD**: From Secret (`postgres-secret`).
 
-SECRET_KEY_BASE: From Secret (stored-files-secret).
-
-POSTGRES_PASSWORD: From Secret (postgres-secret).
-Database Setup
+### Database Setup
 
 Run the following commands to set up the database:
 
+```bash
 kubectl exec -it <pod-name> -- bundle exec rails db:create
 kubectl exec -it <pod-name> -- bundle exec rails db:migrate
+```
 
-Troubleshooting
+---
 
-Error: secret "postgres-secret" not found
+## Troubleshooting
 
-Ensure the secret is created as described in the Secrets section.
+### Error: `secret "postgres-secret" not found`
 
-Connection Issues
+- Ensure the secret is created as described in the Secrets section.
 
-Verify database credentials and connectivity:
+### Connection Issues
 
-The database must be running and accessible at the POSTGRES_HOST specified in your deployment.
-
-Check if the password in postgres-secret matches the database user password.
-
+- Verify database credentials and connectivity:
+  - The database must be running and accessible at the `POSTGRES_HOST` specified in your deployment.
+  - Check if the password in `postgres-secret` matches the database user password.
