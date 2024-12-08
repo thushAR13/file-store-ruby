@@ -150,3 +150,15 @@ kubectl exec -it <pod-name> -- bundle exec rails db:migrate
 - Verify database credentials and connectivity:
   - The database must be running and accessible at the `POSTGRES_HOST` specified in your deployment.
   - Check if the password in `postgres-secret` matches the database user password.
+
+## Docker Image
+
+This service is available as a Docker image:
+
+- **Docker Hub**: [your-dockerhub-thushar13/stored-files-service](https://hub.docker.com/r/thushar13/stored-files-service)
+
+To pull the image:
+```bash
+docker pull
+thushar13/stored-files-service:latest
+
