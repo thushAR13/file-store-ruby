@@ -90,9 +90,49 @@ Returns the total number of words across all files.
 
 Frequent Words
 
+For kubernetes
+
+Prerequisites
+
+Kubernetes cluster (e.g., Minikube, Kind, or a cloud provider)
+
+PostgreSQL database
+
+Docker for building and pushing application images
+
 ruby cli/file_store_client.rb freq_words [limit] [order]
 
 limit: Number of words to retrieve (default: 10).
 
 order: asc for least frequent, desc for most frequent (default: desc).
+
+Environment Variables
+
+The following environment variables must be set via Kubernetes ConfigMaps and Secrets:
+
+BASE_URL: From ConfigMap (stored-files-config).
+
+SECRET_KEY_BASE: From Secret (stored-files-secret).
+
+POSTGRES_PASSWORD: From Secret (postgres-secret).
+Database Setup
+
+Run the following commands to set up the database:
+
+kubectl exec -it <pod-name> -- bundle exec rails db:create
+kubectl exec -it <pod-name> -- bundle exec rails db:migrate
+
+Troubleshooting
+
+Error: secret "postgres-secret" not found
+
+Ensure the secret is created as described in the Secrets section.
+
+Connection Issues
+
+Verify database credentials and connectivity:
+
+The database must be running and accessible at the POSTGRES_HOST specified in your deployment.
+
+Check if the password in postgres-secret matches the database user password.
 
