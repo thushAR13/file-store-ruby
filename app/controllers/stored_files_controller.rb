@@ -9,17 +9,40 @@ class StoredFilesController < ApplicationController
 
   # Add a new file
   def create
-    file = params[:file]
-    hash = Digest::SHA256.file(file.tempfile).hexdigest
-
-    if StoredFile.exists?(file_hash: hash)
-      render json: { error: 'File already exists' }, status: :conflict
+    file_hash = params[:file_hash]
+    new_name = params[:name]
+  
+    if file_hash.present?
+      # Handle cases where the file hash is sent instead of a file
+      existing_file = StoredFile.find_by(file_hash: file_hash)
+      if existing_file
+        begin
+          # Create a new entry with the existing file's content
+          new_file = StoredFile.create!(name: new_name, file_hash: file_hash)
+          new_file.file.attach(existing_file.file.blob)
+          render json: { message: 'File already exists. New entry created with existing content.', file: new_file }, status: :created
+        rescue ActiveRecord::RecordInvalid => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        end
+      else
+        render json: { error: 'File hash not found on the server.' }, status: :unprocessable_entity
+      end
     else
-      stored_file = StoredFile.create!(name: file.original_filename, file_hash: hash)
-      stored_file.file.attach(file)
-      render json: stored_file, status: :created
+      # Handle the case where a file is uploaded
+      uploaded_file = params[:file]
+      hash = Digest::SHA256.file(uploaded_file.tempfile).hexdigest
+  
+      begin
+        stored_file = StoredFile.create!(name: uploaded_file.original_filename, file_hash: hash)
+        stored_file.file.attach(uploaded_file)
+        render json: stored_file, status: :created
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
     end
   end
+  
+  
 
   # Delete a file
   def destroy
@@ -31,14 +54,12 @@ class StoredFilesController < ApplicationController
 
   # Update a file
   def update
-    stored_file = StoredFile.find_by(name: params[:name])
+    stored_file = StoredFile.find_by(name: params[:file].original_filename)
     file = params[:file]
     if stored_file
       hash = Digest::SHA256.file(file.tempfile).hexdigest
       if stored_file.file_hash == hash
         render json: { message: 'No update needed' }
-      elsif duplicate = StoredFile.find_by(file_hash: hash)
-        render json: { message: "File already exists under name #{duplicate.name}" }
       else
         stored_file.file.attach(file)
         stored_file.update!(file_hash: hash)
@@ -72,5 +93,14 @@ class StoredFilesController < ApplicationController
     sorted_words = word_counts.sort_by { |_, count| count }
     sorted_words.reverse! if order == :desc
     render json: sorted_words.first(limit).to_h
+  end
+
+  def check_hash
+    stored_file = StoredFile.find_by(file_hash: params[:file_hash])
+    if stored_file
+      render json: { match: true }
+    else
+      render json: { match: false }
+    end
   end
 end
