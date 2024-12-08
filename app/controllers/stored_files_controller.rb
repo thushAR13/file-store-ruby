@@ -46,10 +46,14 @@ class StoredFilesController < ApplicationController
 
   # Delete a file
   def destroy
-    stored_file = StoredFile.find_by!(name: params[:name])
-    stored_file.file.purge
-    stored_file.destroy
-    render json: { message: 'File deleted successfully' }
+    stored_file = StoredFile.find_by(name: params[:name])
+    if stored_file
+      stored_file.file.purge
+      stored_file.destroy
+      render json: { message: 'File deleted successfully' }
+    else
+      render json: { error: 'File not found' }
+    end
   end
 
   # Update a file
