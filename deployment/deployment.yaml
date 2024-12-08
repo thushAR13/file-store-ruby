@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stored-files-service
+  labels:
+    app: stored-files-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stored-files-service
+  template:
+    metadata:
+      labels:
+        app: stored-files-service
+    spec:
+      containers:
+      - name: stored-files-container
+        image: thushar13/stored-files-service:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: stored-files-config
+              key: BASE_URL
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              name: stored-files-secret
+              key: SECRET_KEY_BASE
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
