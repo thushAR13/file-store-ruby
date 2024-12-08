@@ -1,24 +1,98 @@
-# README
+File Store Service
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Overview
 
-Things you may want to cover:
+This is a file store service built with Ruby on Rails that provides an HTTP server and a command-line client (CLI) for managing plain-text files. The service allows you to:
 
-* Ruby version
+Add files to the server.
 
-* System dependencies
+List stored files.
 
-* Configuration
+Delete files by name.
 
-* Database creation
+Update file contents.
 
-* Database initialization
+Perform operations like word count and finding the most frequent words.
 
-* How to run the test suite
+The service is optimized to avoid uploading duplicate file contents by using SHA256 hashing to detect existing files on the server.
 
-* Services (job queues, cache servers, search engines, etc.)
+Installation and Setup
 
-* Deployment instructions
+Prerequisites
 
-* ...
+Ruby (>= 3.1)
+
+Rails (>= 7.0)
+
+PostgreSQL
+
+Docker (optional)
+
+Clone the Repository
+
+git clone <repository_url>
+cd file_store
+
+Install Dependencies
+
+bundle install
+
+Configure the Database
+
+Edit the config/database.yml file to set up your PostgreSQL credentials.
+
+Create the database:
+
+rails db:create
+rails db:migrate
+
+Start the Server
+
+rails server
+
+The server will start at http://localhost:3000.
+
+CLI Usage
+
+The CLI client is located in cli/file_store_client.rb. Below are the available commands:
+
+Add Files
+
+ruby cli/file_store_client.rb add <file_path1> <file_path2> ...
+
+Uploads one or more files to the server.
+
+Optimized to reuse existing content if a file with the same content exists on the server.
+
+List Files
+
+ruby cli/file_store_client.rb list
+
+Retrieves a list of all stored files.
+
+Delete a File
+
+ruby cli/file_store_client.rb delete <file_name>
+
+Deletes a file by name.
+
+Update a File
+
+ruby cli/file_store_client.rb update <file_path>
+
+Updates the contents of a file on the server.
+
+Word Count
+
+ruby cli/file_store_client.rb word_count
+
+Returns the total number of words across all files.
+
+Frequent Words
+
+ruby cli/file_store_client.rb freq_words [limit] [order]
+
+limit: Number of words to retrieve (default: 10).
+
+order: asc for least frequent, desc for most frequent (default: desc).
+
